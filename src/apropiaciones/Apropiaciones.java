@@ -79,6 +79,7 @@ public class Apropiaciones {
         st.setLong(1, primerPagoId);
         st.setBigDecimal(2, montoApropiar);
         st.executeUpdate();
+        st.close();
     }
 
     public List<Object[]> getResultList(String sql, List<Object> params) throws Exception {
