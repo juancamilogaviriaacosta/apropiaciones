@@ -46,7 +46,7 @@ public class Apropiaciones {
                 + "AND tm.saldo_real > tm.monto_apropiar98\n"
                 + "AND tm.monto_apropiar98 > 100\n"
                 + "AND tm.valor_real_pp > 0\n"
-                + "AND tm.paciente_id  = 1058690\n"
+                + "--AND tm.paciente_id  = 1058690\n"
                 + "ORDER BY tm.paciente_id";
 
         Map<Integer, BigDecimal> mapa = new HashMap<>();
@@ -54,23 +54,24 @@ public class Apropiaciones {
         for (Object[] tmp : rl) {
             Integer pacienteId = (Integer) tmp[0];
             Long primerPagoId = (Long) tmp[1];
-            BigDecimal saldoPac = (BigDecimal) tmp[2];
             BigDecimal montoApropiar = (BigDecimal) tmp[3];
 
             if (!mapa.containsKey(pacienteId)) {
+                BigDecimal saldoPac = (BigDecimal) tmp[2];
                 mapa.put(pacienteId, saldoPac);
             }
 
             if (mapa.get(pacienteId).subtract(montoApropiar).compareTo(BigDecimal.ZERO) > 0) {
-                aplicarApropiacion(pacienteId, primerPagoId, mapa.get(pacienteId));
-                mapa.put(pacienteId, saldoPac.subtract(montoApropiar));
+                aplicarApropiacion(pacienteId, primerPagoId, mapa.get(pacienteId), montoApropiar);
+                mapa.put(pacienteId, mapa.get(pacienteId).subtract(montoApropiar));
             }
         }
     }
 
-    public void aplicarApropiacion(Integer pacienteId, Long primerPagoId, BigDecimal montoApropiar) throws Exception {
+    public void aplicarApropiacion(Integer pacienteId, Long primerPagoId, BigDecimal saldoPac, BigDecimal montoApropiar) throws Exception {
         System.out.println("pacienteId " + pacienteId);
         System.out.println("primerPagoId " + primerPagoId);
+        System.out.println("saldoPac " + saldoPac);
         System.out.println("montoApropiar " + montoApropiar);
         System.out.println("");
 
@@ -78,7 +79,7 @@ public class Apropiaciones {
         PreparedStatement st = con.prepareStatement(sql);
         st.setLong(1, primerPagoId);
         st.setBigDecimal(2, montoApropiar);
-        //st.executeUpdate();
+        st.executeUpdate();
     }
 
     public List<Object[]> getResultList(String sql, List<Object> params) throws Exception {
