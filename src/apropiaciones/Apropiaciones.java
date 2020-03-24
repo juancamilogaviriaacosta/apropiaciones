@@ -76,8 +76,8 @@ public class Apropiaciones {
 
         String sql = "INSERT INTO core.nota_apropiacion(fecha_modificacion, usuario_modificacion, estado, monto_acreditar, porcentaje, concepto_nota_debito_id, primer_pago_id) VALUES ('2020-03-23 09:00:00', 'sistema', 'A', ?, 9.8, 64, ?)";
         PreparedStatement st = con.prepareStatement(sql);
-        st.setLong(1, primerPagoId);
-        st.setBigDecimal(2, montoApropiar);
+        st.setBigDecimal(1, montoApropiar);
+        st.setLong(2, primerPagoId);
         st.executeUpdate();
         st.close();
     }
