@@ -25,16 +25,16 @@ public class Apropiaciones {
     public static void main(String[] args) {
         try {
             Apropiaciones ap = new Apropiaciones();
-            ap.calcularApropiaciones();
+            ap.calcularApropiaciones(args);
         } catch (Exception ex) {
             Logger.getLogger(Apropiaciones.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    public void calcularApropiaciones() throws Exception {
-        String url = "";
-        String user = "";
-        String passwd = "";
+    public void calcularApropiaciones(String[] args) throws Exception {
+        String url = args[0];
+        String user = args[1];
+        String passwd = args[2];
 
         Class.forName("org.postgresql.Driver");
         con = DriverManager.getConnection(url, user, passwd);
@@ -46,14 +46,14 @@ public class Apropiaciones {
                 + "AND tm.saldo_real > tm.monto_apropiar98\n"
                 + "AND tm.monto_apropiar98 > 100\n"
                 + "AND tm.valor_real_pp > 0\n"
-                + "AND AND tm.paciente_id  = 1058690\n"
+                + "AND tm.paciente_id  = 1058690\n"
                 + "ORDER BY tm.paciente_id";
 
         Map<Integer, BigDecimal> mapa = new HashMap<>();
         List<Object[]> rl = getResultList(sql, null);
         for (Object[] tmp : rl) {
             Integer pacienteId = (Integer) tmp[0];
-            BigInteger primerPagoId = (BigInteger) tmp[1];
+            Long primerPagoId = (Long) tmp[1];
             BigDecimal saldoPac = (BigDecimal) tmp[2];
             BigDecimal montoApropiar = (BigDecimal) tmp[3];
 
@@ -68,16 +68,17 @@ public class Apropiaciones {
         }
     }
 
-    public void aplicarApropiacion(Integer pacienteId, BigInteger primerPagoId, BigDecimal montoApropiar) throws Exception {
+    public void aplicarApropiacion(Integer pacienteId, Long primerPagoId, BigDecimal montoApropiar) throws Exception {
         System.out.println("pacienteId " + pacienteId);
         System.out.println("primerPagoId " + primerPagoId);
         System.out.println("montoApropiar " + montoApropiar);
-        String sql = "INSERT INTO core.nota_apropiacion () VALUES ()";
+        System.out.println("");
+
+        String sql = "INSERT INTO core.nota_apropiacion(fecha_modificacion, usuario_modificacion, estado, monto_acreditar, porcentaje, concepto_nota_debito_id, primer_pago_id) VALUES ('2020-03-23 09:00:00', 'sistema', 'A', ?, 9.8, 64, ?)";
         PreparedStatement st = con.prepareStatement(sql);
-        st.setInt(0, pacienteId);
-        st.setLong(1, primerPagoId.longValue());
+        st.setLong(1, primerPagoId);
         st.setBigDecimal(2, montoApropiar);
-        st.executeUpdate();
+        //st.executeUpdate();
     }
 
     public List<Object[]> getResultList(String sql, List<Object> params) throws Exception {
@@ -95,7 +96,7 @@ public class Apropiaciones {
         while (rs.next()) {
             Object[] rowData = new Object[rsmd.getColumnCount()];
             for (int i = 0; i < rsmd.getColumnCount(); i++) {
-                rowData[i] = rs.getObject(i);
+                rowData[i] = rs.getObject(i+1);
             }
             resp.add(rowData);
         }
