@@ -1,5 +1,8 @@
 package apropiaciones;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -48,6 +51,14 @@ public class Apropiaciones {
                 + "--AND tm.paciente_id  = 1058690\n"
                 + "ORDER BY tm.paciente_id";
 
+        String path = "/home/juan/Escritorio/apropiaciones.sql";
+        File file = new File(path);
+        if(file.exists()) {
+            file.delete();
+        }
+        FileWriter fichero = new FileWriter(path);
+        PrintWriter pw = new PrintWriter(fichero);        
+        
         Map<Integer, BigDecimal> mapa = new HashMap<>();
         List<Object[]> rl = getResultList(sql, null);
         for (Object[] tmp : rl) {
@@ -61,10 +72,13 @@ public class Apropiaciones {
             }
 
             if (mapa.get(pacienteId).subtract(montoApropiar).compareTo(BigDecimal.ZERO) > 0) {
-                aplicarApropiacion(pacienteId, primerPagoId, mapa.get(pacienteId), montoApropiar);
+                pw.println("INSERT INTO core.nota_apropiacion(fecha_modificacion, usuario_modificacion, estado, monto_acreditar, porcentaje, concepto_nota_debito_id, primer_pago_id) VALUES ('2020-03-23 09:00:00', 'sistema', 'A', " + montoApropiar + ", 9.8, 64, " + primerPagoId + ");");
+                //aplicarApropiacion(pacienteId, primerPagoId, mapa.get(pacienteId), montoApropiar);
                 mapa.put(pacienteId, mapa.get(pacienteId).subtract(montoApropiar));
             }
         }
+        pw.close();
+        fichero.close();
     }
 
     public void aplicarApropiacion(Integer pacienteId, Long primerPagoId, BigDecimal saldoPac, BigDecimal montoApropiar) throws Exception {
